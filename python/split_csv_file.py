@@ -17,7 +17,7 @@ def split_csv_file(csv_file_path, test_size=0.2):
     for index, row in df.iterrows():
         file_name = row['filename']
         label = row['target']
-        spectrogram = gms.generate_mel_spectrogram('../data/sounds/ESC-50-master/audio/' + file_name)
+        spectrogram = gms.log_mel_spectrogram('../data/sounds/ESC-50-master/audio/' + file_name, rate=None)
         X.append(spectrogram)
         y.append(label)
 
@@ -25,8 +25,12 @@ def split_csv_file(csv_file_path, test_size=0.2):
     X = np.array(X)
     y = np.array(y)
 
-    # One-hot encode the labels
-    y_encoded = to_categorical(y, num_classes=50)
-
     # Split data into training and testing sets
-    return train_test_split(X, y_encoded, test_size=test_size, random_state=42)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=42)
+
+    # One-hot encode the labels for 20 classes
+    num_classes = 20
+    y_train_encoded = to_categorical(y_train, num_classes=num_classes)
+    y_test_encoded = to_categorical(y_test, num_classes=num_classes)
+
+    return X_train, X_test, y_train_encoded, y_test_encoded
