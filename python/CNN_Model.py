@@ -1,19 +1,35 @@
 import os
+
+import numpy as np
+import tensorflow as tf
 from keras.models import Sequential
-from keras.layers import Conv2D, MaxPooling2D, Dropout, Flatten, Dense, Reshape
+from tensorflow.keras.layers import Conv2D, MaxPooling2D, Dropout, Flatten, Dense
 import split_csv_file as scf
 
 os.environ['CUDA_VISIBLE_DEVICES'] = '-1'  # Force TensorFlow to use CPU only
 
-# Assuming x_train shape is (640, 128, 431)
-input_shape = (128, 431, 1)  # Adjusted input shape
-
 # Split data into training and testing sets
-X_train, X_test, y_train_encoded, y_test_encoded = scf.split_csv_file('../data/sounds/ESC-50-master/meta/esc50.csv')
+print("Num GPUs Available: ", len(tf.config.list_physical_devices('GPU')))
+X_train, X_test, y_train, y_test = scf.split_csv_file('../data/sounds/ESC-50-master/meta/esc50-10.csv')
+
+# Convert lists to NumPy arrays
+X_train = np.array(X_train)
+X_test = np.array(X_test)
+y_train = np.array(y_train)
+y_test = np.array(y_test)
+
+# Get the shape of the training data
+num_samples, sequence_length, width = X_train.shape
+print(sequence_length, width)
+
+# One-hot encode the labels
+num_classes = 20  # Update to the correct number of classes
+y_train_encoded = tf.keras.utils.to_categorical(y_train, num_classes)
+y_test_encoded = tf.keras.utils.to_categorical(y_test, num_classes)
 
 # Define CNN model architecture
 model = Sequential()
-model.add(Conv2D(32, (3, 3), activation='relu', strides=(1, 1), padding='same', input_shape=input_shape))
+model.add(Conv2D(32, (3, 3), activation='relu', strides=(1, 1), padding='same', input_shape=(sequence_length, width, 1)))
 model.add(Conv2D(64, (3, 3), activation='relu', strides=(1, 1), padding='same'))
 model.add(Conv2D(128, (3, 3), activation='relu', strides=(1, 1), padding='same'))
 model.add(MaxPooling2D((2, 2)))
@@ -21,7 +37,7 @@ model.add(Dropout(0.5))
 model.add(Flatten())
 model.add(Dense(128, activation='relu'))
 model.add(Dense(64, activation='relu'))
-model.add(Dense(20, activation='softmax'))  # Adjusted output units to match 20 possible outputs
+model.add(Dense(num_classes, activation='softmax'))  # Adjusted output units to match the number of classes
 
 model.summary()
 
@@ -29,10 +45,6 @@ model.summary()
 model.compile(optimizer='adam',
               loss='categorical_crossentropy',
               metrics=['accuracy'])
-
-# Reshape X_train and X_test to match the expected input shape
-X_train = X_train.reshape(-1, 128, 431, 1)
-X_test = X_test.reshape(-1, 128, 431, 1)
 
 # Train the model
 history = model.fit(X_train, y_train_encoded, epochs=20, batch_size=32, validation_data=(X_test, y_test_encoded))
