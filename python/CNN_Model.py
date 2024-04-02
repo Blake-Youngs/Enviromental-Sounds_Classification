@@ -1,5 +1,4 @@
 import os
-
 import numpy as np
 import tensorflow as tf
 from keras.models import Sequential
@@ -29,25 +28,27 @@ y_test_encoded = tf.keras.utils.to_categorical(y_test, num_classes)
 
 # Define CNN model architecture
 model = Sequential()
-model.add(Conv2D(32, (3, 3), activation='relu', strides=(1, 1), padding='same', input_shape=(sequence_length, width, 1)))
-model.add(Conv2D(64, (3, 3), activation='relu', strides=(1, 1), padding='same'))
-model.add(Conv2D(128, (3, 3), activation='relu', strides=(1, 1), padding='same'))
-model.add(MaxPooling2D((2, 2)))
+model.add(Conv2D(20, (57, 6), activation='relu', strides=(1, 1), padding='valid', input_shape=(sequence_length, width, 1)))
+model.add(MaxPooling2D((1, 4), strides=(1, 4)))  # Adjusted pooling window and stride
 model.add(Dropout(0.5))
+model.add(Conv2D(40, (1, 3), activation='relu', strides=(1, 1), padding='valid'))
+model.add(MaxPooling2D((4, 4), strides=(4, 4)))
 model.add(Flatten())
-model.add(Dense(128, activation='relu'))
-model.add(Dense(64, activation='relu'))
-model.add(Dense(num_classes, activation='softmax'))  # Adjusted output units to match the number of classes
+model.add(Dense(256, activation='relu'))
+model.add(Dropout(0.5))
+model.add(Dense(256, activation='relu'))
+model.add(Dropout(0.5))
+model.add(Dense(num_classes, activation='softmax'))
 
 model.summary()
 
 # Compile the model
-model.compile(optimizer='adam',
+model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=0.0001),
               loss='categorical_crossentropy',
               metrics=['accuracy'])
 
 # Train the model
-history = model.fit(X_train, y_train_encoded, epochs=20, batch_size=32, validation_data=(X_test, y_test_encoded))
+history = model.fit(X_train, y_train_encoded, epochs=1000, batch_size=128, validation_data=(X_test, y_test_encoded))
 
 # Evaluate the model
 test_loss, test_acc = model.evaluate(X_test, y_test_encoded)

@@ -24,3 +24,29 @@ def log_mel_spectrogram(wave_file_path, rate=None):
     log_mel_spectrogram = librosa.power_to_db(spectrogram)
 
     return log_mel_spectrogram
+
+def test_spectrogram(wave_file_path, rate=None, visual_frame_rate=1, audio_frame_rate=5):
+    # Load audio file
+    audio, sr = librosa.load(wave_file_path, sr=rate)  # sr=None to preserve the native sampling rate
+
+    # Compute Mel spectrogram
+    spectrogram = librosa.feature.melspectrogram(y=audio, sr=sr, n_fft=1024, hop_length=512, n_mels=60)
+
+    # Convert to log scale
+    log_mel_spectrogram = librosa.power_to_db(spectrogram)
+
+    # Compute derivative of log mel spectrogram
+    delta_log_mel_spectrogram = librosa.feature.delta(log_mel_spectrogram)
+
+    # Interpolate both channels
+    visual_frames = log_mel_spectrogram.shape[1]
+    audio_frames = len(audio) // (sr // audio_frame_rate)
+    interpolated_log_mel_spectrogram = np.zeros((log_mel_spectrogram.shape[0], visual_frames))
+    interpolated_delta_log_mel_spectrogram = np.zeros((delta_log_mel_spectrogram.shape[0], visual_frames))
+
+    for i in range(visual_frames):
+        audio_index = min(int(i * (audio_frames / visual_frames)), audio_frames - 1)
+        interpolated_log_mel_spectrogram[:, i] = log_mel_spectrogram[:, audio_index]
+        interpolated_delta_log_mel_spectrogram[:, i] = delta_log_mel_spectrogram[:, audio_index]
+
+    return interpolated_log_mel_spectrogram

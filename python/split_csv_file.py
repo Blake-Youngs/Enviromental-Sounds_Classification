@@ -16,7 +16,7 @@ def split_csv_file(csv_file_path, test_size=0.2):
     for index, row in df.iterrows():
         file_name = row['filename']
         label = row['target']
-        spectrogram = gms.mel_spectrogram('../data/sounds/ESC-50-master/audio/' + file_name, rate=16000)
+        spectrogram = gms.test_spectrogram('../data/sounds/ESC-50-master/audio/' + file_name, rate=7000)
         X.append(spectrogram)
         y.append(label)
 
