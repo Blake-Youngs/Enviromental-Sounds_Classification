@@ -4,10 +4,9 @@ import pandas as pd
 import numpy as np
 
 # Load the trained model
-model = tf.keras.models.load_model('/home/Heriberto/PycharmProjects/Enviromental-Sounds_Classification/model92.5.h5')
-
+model = tf.keras.models.load_model('C:\\Users\\Herib\\Downloads\\Enviromental-Sounds_Classification-main\\Enviromental-Sounds_Classification-main\\python\\files\\10Label_737.h5')
 # Load the CSV file into a pandas DataFrame
-df = pd.read_csv('/home/Heriberto/PycharmProjects/Enviromental-Sounds_Classification/esc50-10.csv')
+df = pd.read_csv('C:\\Users\\Herib\\Downloads\\Enviromental-Sounds_Classification-main\\Enviromental-Sounds_Classification-main\\python\\files\\esc50-10.csv')
 
 # Create a dictionary mapping target labels to categories
 label_to_category = dict(zip(df['target'], df['category']))
@@ -16,7 +15,7 @@ label_to_category = dict(zip(df['target'], df['category']))
 labels = ['helicopter', 'chainsaw', 'siren', 'car_horn', 'engine', 'train', 'church_bells', 'airplane', 'fireworks', 'hand_saw']
 
 # Need to get the wav file data
-log_mel_spec = gms.log_mel_spectrogram('/home/Heriberto/PycharmProjects/Enviromental-Sounds_Classification/audio/1-172649-A-40.wav', 8000)
+log_mel_spec = gms.log_mel_spectrogram('C:\\Users\\Herib\\Downloads\\Enviromental-Sounds_Classification-main\\Enviromental-Sounds_Classification-main\\python\\test audio\\Siren.wav', 8000)
 
 # Reshape the input to match the model's input shape
 log_mel_spec = log_mel_spec.reshape(1, log_mel_spec.shape[0], log_mel_spec.shape[1], 1)
@@ -38,3 +37,4 @@ print("Predicted label index:", predicted_label_index)
 print("Label to Category mapping:")
 for label, category in label_to_category.items():
     print(f"Label: {label}, Category: {category}")
+
